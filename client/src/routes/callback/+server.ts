@@ -2,8 +2,9 @@ import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { page } from '$app/state';
 import { get } from 'svelte/store';
 import { oauthVerifier, oauthIdToken, oauthState } from '$lib/stores/oauthStore';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
-import { BROKER_URL } from '$env/static/private';
+import { BROKER_URL, CLIENT_ID } from '$env/static/private';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const code = page.url.searchParams.get('code');
@@ -35,6 +36,21 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	const data = await response.json();
 	oauthIdToken.set(data.id_token);
+
+	// decode JWT, validate the signature
+	const JWKS = createRemoteJWKSet(new URL(`${BROKER_URL}/.well-known/jwks.json`));
+
+	try {
+		const { payload, protectedHeader } = await jwtVerify(data.id_token, JWKS, {
+			issuer: BROKER_URL,
+			audience: CLIENT_ID
+		});
+	} catch (error) {
+		console.error('JWT verification failed:', error);
+		return new Response('JWT verification failed', { status: 401 });
+	}
+
+	// store the decoded values in a store
 
 	// clear verifier and state
 	oauthVerifier.set(null);
