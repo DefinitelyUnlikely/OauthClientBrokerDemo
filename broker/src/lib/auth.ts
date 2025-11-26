@@ -37,6 +37,8 @@ const dialect = new MssqlDialect({
 });
 
 export const auth = betterAuth({
+	baseURL: 'http://localhost:5173',
+	trustedOrigins: ['http://localhost:5174'],
 	database: {
 		dialect,
 		type: 'mssql'
