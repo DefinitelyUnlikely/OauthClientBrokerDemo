@@ -15,4 +15,6 @@
 
 <h1>Sign in</h1>
 <h2>Sign in with GitHub</h2>
-<button on:click={() => authClient.signIn.social({ provider: 'github', callbackURL: redirect_uri })}>Login with GitHub</button>
+<button on:click={() => authClient.signIn.social({ provider: 'github', callbackURL: redirect_uri })}>
+    Login with GitHub
+</button>
