@@ -1,7 +1,7 @@
-import type { RequestHandler } from '@sveltejs/kit';
+import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { page } from '$app/state';
 import { get } from 'svelte/store';
-import { oauthVerifier } from '$lib/stores/oauthStore';
+import { oauthVerifier, oauthIdToken, oauthState } from '$lib/stores/oauthStore';
 
 import { BROKER_URL } from '$env/static/private';
 
@@ -34,7 +34,11 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	const data = await response.json();
-	const idToken = data.id_token;
+	oauthIdToken.set(data.id_token);
 
-	return new Response('Success');
+	// clear verifier and state
+	oauthVerifier.set(null);
+	oauthState.set(null);
+
+	throw redirect(302, '/');
 };
