@@ -22,7 +22,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		return new Response('State mismatch', { status: 400 });
 	}
 
-	const response = await fetch(`${BROKER_URL}/auth/token`, {
+	const response = await fetch(`${BROKER_URL}/oauth/token`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded' // Per protocol standard
