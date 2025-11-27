@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-    let redirect_uri = page.url.searchParams.get('redirect_uri') || '/error';
+    let redirect_uri = page.url.searchParams.get('redirectTo') || '/error';
 
     onMount(() => {
         if (!redirect_uri) {
