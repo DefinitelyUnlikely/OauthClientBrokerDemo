@@ -2,8 +2,8 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/dataAccess/database';
 import { auth } from '$lib/auth';
 import { error, json } from '@sveltejs/kit';
-import { JWT_SECRET, BETTER_AUTH_URL } from '$env/static/private';
-import { SignJWT } from 'jose';
+import { importJWK, SignJWT } from 'jose';
+import { PRIVATE_KEY_JWK, BETTER_AUTH_URL } from '$env/static/private';
 
 async function verifyChallenge(verifier: string, challenge: string, method: string) {
 	if (method !== 'S256') return false;
@@ -79,24 +79,25 @@ export const POST: RequestHandler = async ({ request }) => {
 		throw error(400, 'User not found');
 	}
 
-	const secret = new TextEncoder().encode(JWT_SECRET);
+	const privateKey = await importJWK(JSON.parse(PRIVATE_KEY_JWK), 'RS256');
+
 	const jwt = await new SignJWT({
 		sub: user.id,
 		name: user.name,
 		email: user.email,
 		image: user.image
 	})
-		.setProtectedHeader({ alg: 'HS256' })
+		.setProtectedHeader({ alg: 'RS256', kid: 'simulated-key-id-1' })
 		.setIssuedAt()
 		.setIssuer(BETTER_AUTH_URL)
 		.setAudience(client_id)
 		.setExpirationTime('1h')
-		.sign(secret);
+		.sign(privateKey);
 
 	await db.deleteFrom('oauth_codes').where('code', '=', code).execute();
 
 	return json({
-		token: jwt,
+		id_token: jwt,
 		token_type: 'Bearer',
 		expires_in: 3600
 	});
