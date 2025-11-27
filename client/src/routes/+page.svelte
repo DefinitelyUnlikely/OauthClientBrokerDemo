@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
+	import { goto } from "$app/navigation"; 
 
     const signIn = async () => {
         goto("/login");
@@ -14,7 +14,12 @@
 
 <h1>Welcome to the client</h1>
 
-<button onclick={signIn}>Login</button>
+{#if user}
+    <p>Hello {user.name}</p>
+    <button onclick={signOut}>Logout</button>
+{:else}
+    <button onclick={signIn}>Login</button>
+{/if}
 
 
 <style>
