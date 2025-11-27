@@ -2,6 +2,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { error, redirect } from '@sveltejs/kit';
 import { nanoid } from 'nanoid';
 import { db } from '$lib/dataAccess/database';
+import { auth } from '$lib/auth';
 
 export const GET: RequestHandler = async ({ url, request }) => {
 	const client_id = url.searchParams.get('client_id');
@@ -42,6 +43,18 @@ export const GET: RequestHandler = async ({ url, request }) => {
 
 	if (client.redirect_uri !== redirect_uri) {
 		throw error(400, 'Invalid redirect_uri');
+	}
+
+	// Also need to check if there is a valid user session in the broker.
+	// If not, redirect to the login page.
+	const session = await auth.api.getSession({
+		headers: request.headers
+	});
+
+	if (!session) {
+		// If no session, redirect to the login page and add the current URL (With query parameters) to redirect
+		// back to this page after login.
+		throw redirect(302, '/login?redirectTo=' + encodeURIComponent(url.toString()));
 	}
 
 	const code = nanoid();
