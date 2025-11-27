@@ -2,13 +2,33 @@
 
 ## Overview
 
-The demo is built using [Svelte](https://svelte.dev/) for the client and [better-auth](https://better-auth.com/) for the identity broker. GitHub is used as the identity provider in this demo. But better-auth supports multiple identity providers, making it suitable to act as the identity broker for service providers that might make use of multiple identity providers at the same time.
+### Context
 
-For simplicity, the client and the identity broker are built in the same repository. 
+This project is a demo for the authentication flow I recommended for an in-house project during my time at an internship, where the goal was to research possible solutions for an SSO system using multiple identity providers. A key aspect was to make it as simple as possible to add more service providers as well as identity providers as needs evolve.
 
-This project is a demo for the authentication flow I implemented for a project at an internship - Where the goal was to research possible solutions for an SSO system using multiple identity providers. A key aspect was to make it as simple as possible to add more service providers as well as identity providers as needs evolve.
+### Architecture
 
-With the current implementation, adding a new identity provider is simply a matter of registering the provider in the identity broker and adding the necessary environment variables, as well as dealing with any configurations needed on the identity provider side (Usually a callback URL). Adding a new service provider requires you to add the service to the broker's trusted origins list as well as to a database table containing the service provider's client id, client secret and redirect uri.
+The demo is built using [Svelte](https://svelte.dev/) for the client and [better-auth](https://better-auth.com/) for the identity broker. For simplicity, the client and the identity broker are built in the same repository.
+
+GitHub is used as the identity provider in this demo. However, better-auth supports multiple identity providers, making it suitable to act as the identity broker for service providers that might make use of multiple identity providers at the same time.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Broker
+    participant GitHub as Identity Provider
+
+    Client->>Broker: Request Login
+    Broker->>GitHub: Redirect to IdP
+    GitHub->>Broker: Return Auth Code
+    Broker->>Client: Return Session/Token
+```
+
+With the current implementation, adding a new identity provider is simply a matter of registering the provider in the identity broker and adding the necessary environment variables, as well as dealing with any configurations needed on the identity provider side (usually a callback URL). Adding a new service provider requires you to add the service to the broker's trusted origins list as well as to a database table containing the service provider's Client ID, Client Secret, and Redirect URI.
+
+### Scope
+
+As this is a demo, it is not a production-ready solution. It focuses on the **authentication** (identifying the user) aspect rather than **authorization** (managing permissions) or user profile management. It does not establish a single source of truth for user claims but merely demonstrates the flow of identity verification.
 
 ### Built with
 

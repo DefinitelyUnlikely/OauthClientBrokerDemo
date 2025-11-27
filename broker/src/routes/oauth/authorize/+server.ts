@@ -30,6 +30,20 @@ export const GET: RequestHandler = async ({ url, request }) => {
 		throw error(400, 'Invalid code challenge method');
 	}
 
+	const client = await db
+		.selectFrom('oauth_clients')
+		.selectAll()
+		.where('id', '=', client_id)
+		.executeTakeFirst();
+
+	if (!client) {
+		throw error(400, 'Invalid client');
+	}
+
+	if (client.redirect_uri !== redirect_uri) {
+		throw error(400, 'Invalid redirect_uri');
+	}
+
 	const code = nanoid();
 	const expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
