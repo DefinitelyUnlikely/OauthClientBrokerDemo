@@ -1,18 +1,26 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
-import { page } from '$app/state';
-import { get } from 'svelte/store';
-import { oauthVerifier, oauthIdToken, oauthState } from '$lib/stores/oauthStore';
+import { oauthIdToken } from '$lib/stores/oauthStore';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 import { BROKER_URL, CLIENT_ID } from '$env/static/private';
 
-export const GET: RequestHandler = async ({ params }) => {
-	const code = page.url.searchParams.get('code');
-	const state = page.url.searchParams.get('state');
-	const verifierValue = get(oauthVerifier);
+export const GET: RequestHandler = async ({ url, cookies }) => {
+	const code = url.searchParams.get('code');
+	const state = url.searchParams.get('state');
+
+	const verifierValue = cookies.get('oauth_verifier');
+	const stateValue = cookies.get('oauth_state');
 
 	if (!code || !verifierValue) {
 		return new Response('Missing code or verifier', { status: 400 });
+	}
+
+	if (!stateValue) {
+		return new Response('Missing stored state', { status: 400 });
+	}
+
+	if (state !== stateValue) {
+		return new Response('State mismatch', { status: 400 });
 	}
 
 	const response = await fetch(`${BROKER_URL}/auth/token`, {
@@ -45,16 +53,22 @@ export const GET: RequestHandler = async ({ params }) => {
 			issuer: BROKER_URL,
 			audience: CLIENT_ID
 		});
+		// store the decoded values in a httpOnly cookie
+		cookies.set('oauth_id_token', data.id_token, {
+			path: '/',
+			httpOnly: true,
+			secure: false, // use true in production, false for development in http
+			sameSite: 'lax',
+			maxAge: 60 * 60 * 24 // 1 day
+		});
 	} catch (error) {
 		console.error('JWT verification failed:', error);
 		return new Response('JWT verification failed', { status: 401 });
+	} finally {
+		// clear verifier and state
+		cookies.delete('oauth_verifier', { path: '/' });
+		cookies.delete('oauth_state', { path: '/' });
 	}
-
-	// store the decoded values in a store
-
-	// clear verifier and state
-	oauthVerifier.set(null);
-	oauthState.set(null);
 
 	throw redirect(302, '/');
 };
