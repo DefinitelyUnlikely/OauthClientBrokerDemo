@@ -53,6 +53,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	if (authCode.client_id !== client_id) {
+		console.log(authCode.client_id, client_id);
 		throw error(400, 'Invalid client id');
 	}
 

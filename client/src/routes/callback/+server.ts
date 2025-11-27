@@ -1,7 +1,7 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
-import { BROKER_URL, CLIENT_ID } from '$env/static/private';
+import { REDIRECT_URI, BROKER_URL, CLIENT_ID } from '$env/static/private';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');
@@ -30,8 +30,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		body: new URLSearchParams({
 			grant_type: 'authorization_code',
 			code,
-			redirect_uri: 'http://localhost:5174/callback',
-			client_id: 'app1',
+			redirect_uri: REDIRECT_URI,
+			client_id: CLIENT_ID,
 			code_verifier: verifierValue
 		})
 	});
