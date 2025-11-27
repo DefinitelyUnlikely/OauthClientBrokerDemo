@@ -57,6 +57,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 		throw redirect(302, '/login?redirectTo=' + encodeURIComponent(url.toString()));
 	}
 
+	const user_id = session.user.id;
 	const code = nanoid();
 	const expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -66,6 +67,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			code,
 			client_id,
 			redirect_uri,
+			user_id,
 			expires_at,
 			code_challenge,
 			code_challenge_method
