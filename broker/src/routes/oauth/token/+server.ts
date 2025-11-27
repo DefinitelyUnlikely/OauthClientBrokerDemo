@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/dataAccess/database';
 import { auth } from '$lib/auth';
 import { error, json } from '@sveltejs/kit';
-import { JWT_SECRET } from '$env/static/private';
+import { JWT_SECRET, BETTER_AUTH_URL } from '$env/static/private';
 import { SignJWT } from 'jose';
 
 async function verifyChallenge(verifier: string, challenge: string, method: string) {
@@ -69,26 +69,26 @@ export const POST: RequestHandler = async ({ request }) => {
 		throw error(400, 'Invalid code verifier');
 	}
 
-	const session = await auth.api.getSession({ headers: request.headers });
+	const user = await db
+		.selectFrom('user')
+		.selectAll()
+		.where('id', '=', authCode.user_id)
+		.executeTakeFirst();
 
-	if (!session || !session.user || session.user.id !== authCode.user_id) {
-		console.log(`session: ${session}`);
-		if (session) {
-			console.log(`session.user: ${session.user.id}`);
-		}
-		console.log(`authCode.user_id: ${authCode.user_id}`);
-		throw error(401, 'Unauthorized');
+	if (!user) {
+		throw error(400, 'User not found');
 	}
 
 	const secret = new TextEncoder().encode(JWT_SECRET);
 	const jwt = await new SignJWT({
-		sub: session.user.id,
-		name: session.user.name,
-		email: session.user.email
+		sub: user.id,
+		name: user.name,
+		email: user.email,
+		image: user.image
 	})
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
-		.setIssuer('http://localhost:5173')
+		.setIssuer(BETTER_AUTH_URL)
 		.setAudience(client_id)
 		.setExpirationTime('1h')
 		.sign(secret);

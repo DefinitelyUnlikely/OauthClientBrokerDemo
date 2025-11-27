@@ -26,9 +26,20 @@ export interface OAuthCode {
 	code_challenge_method: string;
 }
 
+export interface User {
+	id: string;
+	name: string;
+	email: string;
+	emailVerified: boolean;
+	image: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 interface OAuthTables {
 	oauth_clients: OAuthClient;
 	oauth_codes: OAuthCode;
+	user: User;
 }
 
 export const dialect = new MssqlDialect({
