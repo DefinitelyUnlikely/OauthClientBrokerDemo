@@ -2,6 +2,8 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/dataAccess/database';
 import { auth } from '$lib/auth';
 import { error } from '@sveltejs/kit';
+import { JWT_SECRET } from '$env/static/private';
+import { SignJWT } from 'jose';
 
 async function verifyChallenge(verifier: string, challenge: string, method: string) {
 	if (method !== 'S256') return false;
@@ -67,5 +69,30 @@ export const POST: RequestHandler = async ({ request }) => {
 		throw error(400, 'Invalid code verifier');
 	}
 
-	return new Response(JSON.stringify(body));
+	const session = await auth.api.getSession(request);
+
+	if (!session || !session.user || session.user.id !== authCode.user_id) {
+		throw error(401, 'Unauthorized');
+	}
+
+	const secret = new TextEncoder().encode(JWT_SECRET);
+	const jwt = await new SignJWT({
+		sub: session.user.id,
+		name: session.user.name,
+		email: session.user.email
+	})
+		.setProtectedHeader({ alg: 'HS256' })
+		.setIssuedAt()
+		.setIssuer('http://localhost:5173')
+		.setAudience(client_id)
+		.setExpirationTime('1h')
+		.sign(secret);
+
+	return new Response(
+		JSON.stringify({
+			token: jwt,
+			token_type: 'Bearer',
+			expires_in: 3600
+		})
+	);
 };
