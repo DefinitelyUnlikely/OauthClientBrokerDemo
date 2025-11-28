@@ -5,7 +5,7 @@ import { BROKER_URL, CLIENT_ID } from '$env/static/private';
 const JWKS = createRemoteJWKSet(new URL(`${BROKER_URL}/.well-known/jwks.json`));
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const jwt = event.cookies.get('jwt');
+	const jwt = event.cookies.get('oauth_id_token');
 
 	if (jwt) {
 		try {
@@ -17,10 +17,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.locals.user = {
 				id: payload.sub as string,
 				email: payload.email as string,
-				name: payload.name as string
+				name: payload.name as string,
+				image: payload.image as string | null
 			};
 		} catch (error) {
-			event.cookies.delete('jwt', { path: '/' });
+			event.cookies.delete('oauth_id_token', { path: '/' });
 		}
 	}
 

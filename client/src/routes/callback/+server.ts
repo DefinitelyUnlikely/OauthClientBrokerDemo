@@ -59,14 +59,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			sameSite: 'lax',
 			maxAge: 60 * 60 * 24 // 1 day
 		});
-
-		cookies.set('oauth_user_info', JSON.stringify(payload), {
-			path: '/',
-			httpOnly: false,
-			secure: false,
-			sameSite: 'lax',
-			maxAge: 60 * 60 * 24
-		});
 	} catch (error) {
 		console.error('JWT verification failed:', error);
 		return new Response('JWT verification failed', { status: 401 });
