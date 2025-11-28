@@ -9,13 +9,13 @@
         goto("/logout");
     };
 
-    const { user } = $props();
+    const { data } = $props();
 </script>
 
 <h1>Welcome to the client</h1>
 
-{#if user}
-    <p>Hello {user.name}</p>
+{#if data.user}
+    <p>Hello {data.user.name}</p>
     <button onclick={signOut}>Logout</button>
 {:else}
     <button onclick={signIn}>Login</button>
