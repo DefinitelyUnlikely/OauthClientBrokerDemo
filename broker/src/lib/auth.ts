@@ -7,7 +7,7 @@ import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '$env/static/private';
 
 export const auth = betterAuth({
 	baseURL: 'http://localhost:5173',
-	trustedOrigins: ['http://localhost:5174'],
+	trustedOrigins: ['http://localhost:5174', 'http://localhost:5175'],
 	database: {
 		dialect,
 		type: 'mssql'
