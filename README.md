@@ -59,3 +59,5 @@ And if you want to try the demo out the gate with MS SQL, add these as well with
    - CLIENT_SECRET
    - REDIRECT_URI (Where the broker should be doing callbacks)
    - BROKER_URL (at what URL the broker exists)
+6. in the lib/dataAccess/db_schema.sql file, SQL commands for creating the required oauth tables exists. Run them against your database.
+7. Run `npx @better-auth/cli generate` and `npx @better-auth/cli migrate` to generate and migrate the required better-auth tables.
