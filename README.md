@@ -45,7 +45,8 @@ As this is a demo, it is not a production-ready solution. It focuses on the **au
     - BETTER_AUTH_URL (the base URL for your broker)
     - GITHUB_CLIENT_SECRET (both this and client id can be created easily with GitHubs dev tools)
     - GITHUB_CLIENT_ID
-    - PRIVATE_KEY_JWK 
+    - PRIVATE_KEY_JWK
+      
 And if you want to try the demo out the gate with MS SQL, add these as well with your information:
     - MSSQL_SERVER
     - MSSQL_DATABASE
